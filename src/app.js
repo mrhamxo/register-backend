@@ -55,6 +55,13 @@ app.post('/register', async (req, res) => {
       const token = await registerEmployee.generateAuthToken();
       console.log('the token part ' + token);
 
+      // data storing in cookie
+      res.cookie('jwt', token, {
+        expires: new Date(date.now() + 30000),
+        httpOnly: true,
+      });
+      console.log(cookie);
+
       const registered = await registerEmployee.save();
       console.log('the registered part ' + registered);
       res.status(201).send(registered);
