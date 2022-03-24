@@ -5,6 +5,7 @@ require('./database/connection.js');
 const hbs = require('hbs');
 const Register = require('./models/registers');
 const bcrypt = require('bcrypt');
+var cookieParser = require('cookie-parser')
 
 const app = express();
 const port = 2000;
@@ -14,6 +15,7 @@ const static_path = path.join(__dirname, '../public');
 const template_path = path.join(__dirname, '../templates/views');
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static(static_path));
@@ -25,6 +27,9 @@ app.set('views', template_path);
 // console.log(process.env.SECRET_KEY);
 
 // handling get request
+app.get('/secret', (req, res) => {
+  res.render('secret');
+});
 app.get('/register', (req, res) => {
   res.render('register');
 });
@@ -55,12 +60,12 @@ app.post('/register', async (req, res) => {
       const token = await registerEmployee.generateAuthToken();
       console.log('the token part ' + token);
 
-      // data storing in cookie
+    // data storing in cookie in register part
       res.cookie('jwt', token, {
-        expires: new Date(date.now() + 30000),
+        expires: new Date(Date.now() + 30000),
         httpOnly: true,
       });
-      console.log(cookie);
+      // console.log(cookie);
 
       const registered = await registerEmployee.save();
       console.log('the registered part ' + registered);
@@ -86,6 +91,14 @@ app.post('/login', async (req, res) => {
 
     const token = await userEmail.generateAuthToken();
     console.log('the token part ' + token);
+
+    // data storing in cookie in login part
+    res.cookie('jwt', token, {
+      expires: new Date(Date.now() + 30000),
+      httpOnly: true,
+      // secure: true,
+    });
+    console.log(`this is the cookie: ${res.cookie.jwt}`);
 
     if (isMatch) {
       res.status(201).send(userEmail);
